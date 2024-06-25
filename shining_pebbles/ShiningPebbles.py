@@ -32,6 +32,9 @@ def get_today(form="%Y-%m-%d"):
         "datetime": datetime.now(),
         "%Y%m%d%H": datetime.now().strftime("%Y%m%d%H"),
         "%Y%m%d%H%M": datetime.now().strftime("%Y%m%d%H%M"),
+        "%Y-%m-%d-%H-%M": datetime.now().strftime("%Y-%m-%d-%H-%M"),
+        "%Y%m%d%H%M%S": datetime.now().strftime("%Y%m%d%H%M%S"),
+        "%Y-%m-%d %H:%M:%S": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "save": datetime.now().strftime("%Y%m%d%H%M"),
     }
     today = mapping[form]
@@ -156,8 +159,8 @@ def open_df_in_file_folder_by_regex(file_folder, regex, option="path", index_col
     df = pd.read_csv(latest_file_path, index_col=index_col)
     return df
 
-def open_json_in_file_folder_by_regex(file_folder, regex, option="path"):
-    latest_file_path = scan_files_including_regex(file_folder, regex, option)[-1]
+def open_json_in_file_folder_by_regex(file_folder, regex, option="path", index=-1):
+    latest_file_path = scan_files_including_regex(file_folder, regex, option)[index]
     with open(latest_file_path, 'r', encoding='utf-8') as file:
         dct = json.load(file)
     return dct
@@ -390,6 +393,18 @@ def update_all_timeseries_datasets_in_file_folder(dataset_file_folder):
         update_timeseries_dataset_from_old_and_new_in_file_folder(file_folder=dataset_file_folder, fund_code=code)
     return None
 
+
+def find_new_elements(data_old, data_new):
+    new_elements = []
+    for datum_new in data_new:
+        is_new_or_updated = True
+        for datum_old in data_old:
+            if all(datum_new.get(key) == datum_old.get(key) for key in set(datum_new.keys()) | set(datum_old.keys())):
+                is_new_or_updated = False
+                break
+        if is_new_or_updated:
+            new_elements.append(datum_new)
+    return new_elements
 
 
 ### JSON Functions
