@@ -299,8 +299,38 @@ def get_quarters(start_year, end_year):
             quarters.append(f'{year} {quarter}')
     return quarters
 
+
 def pick_something_in_string(string, something):
     return re.search(pattern=something, string=string).group()
+
+
+def pick_n_characters_followed_by_something_in_string(string, something, n):
+    # regex pattern to find 'something' followed by n word characters
+    regex = re.escape(something) + fr'(\w{{{n}}})'
+    print(f'input regex: {regex}')
+    match = re.search(pattern=regex, string=string)
+    if match:
+        return match.group(1)
+    else:
+        return None
+
+def pick_menu_code_in_file_name(file_name):
+    return pick_n_characters_followed_by_something_in_string(file_name, something='menu', n=4)
+
+def pick_code_in_file_name(file_name):
+    return pick_n_characters_followed_by_something_in_string(file_name, something='code', n=6)
+
+def pick_input_date_in_file_name(file_name):
+    return pick_n_characters_followed_by_something_in_string(file_name, something='at', n=8)
+
+def pick_start_date_in_file_name(file_name):
+    return pick_n_characters_followed_by_something_in_string(file_name, something='from', n=8)
+
+def pick_end_date_in_file_name(file_name):
+    return pick_n_characters_followed_by_something_in_string(file_name, something='to', n=8)
+
+def pick_save_date_in_file_name(file_name):
+    return pick_n_characters_followed_by_something_in_string(file_name, something='save', n=8)
 
 def get_fund_codes_in_file_folder(dataset_file_folder):
     if re.match(r'-\d{4}', dataset_file_folder):
