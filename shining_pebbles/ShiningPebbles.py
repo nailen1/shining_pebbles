@@ -443,3 +443,59 @@ def export_json_from_dct(dct, file_folder, file_name):
     file_path = os.path.join(file_folder, file_name)
     with open(file_path, 'w') as f:
         json.dump(dct, f, ensure_ascii=False)
+
+
+### TIMESERIES FUNCTIONS
+### GENERATE A STANDARD TIMESERIES DATASET 
+def preprocess_timeseries(df, time_col_from, value_col_from, time_col_to, value_col_to):
+    print('-step 1: drop NaN')
+    df = df[[time_col_from, value_col_from]].dropna()
+    print('-step 2: rename columns to date and price')
+    df = df.rename(columns={time_col_from: time_col_to, value_col_from: value_col_to})
+    print('-step 3: reset index')
+    df = df.reset_index(drop=True)
+    df = df.copy()
+    try:
+        print('-step 4: convert value to float type')
+        df[value_col_to] = df[value_col_to].str.replace(',', '').astype(float)
+    except Exception as e:
+        print(e)
+    return df
+
+
+def preprocess_timeseries_for_single_column(df, date_col_name, price_col_name):
+    df = preprocess_timeseries(df=df, time_col_from=date_col_name, value_col_from=price_col_name, time_col_to='date', value_col_to='price')
+    return df
+
+
+def preprocess_timeseries_for_multi_columns(df, time_col_from, value_cols_from, time_col_to, value_cols_to):
+    print('-step 1: drop NaN')
+    df = df[[time_col_from, *value_cols_from]].dropna()
+    print('-step 2: rename columns to date and price')
+    df.columns = [time_col_to, *value_cols_to]
+    print('-step 3: reset index')
+    df = df.reset_index(drop=True)
+    df = df.copy()
+    try:
+        print('-step 4: convert value to float type')
+        for col in value_cols_to:
+            df[col] = df[col].str.replace(',', '').astype(float)
+    except Exception as e:
+        print(e)
+    return df
+
+
+## APPLICATION: FOR KB FUND SYSTEM>MOS>2160 FUND DATASETS 
+def preprocess_to_extract_timeseries_price_in_menu2160(df_menu2160):
+    df = preprocess_timeseries_for_single_column(df=df_menu2160, date_col_name='일자', price_col_name='수정\n기준가')
+    return df
+
+def preprocess_to_extract_timeseries_price_in_menu2160(df_menu2160):
+    df = preprocess_timeseries(df_menu2160, time_col_from='일자', value_col_from='순자산총액', time_col_to='date', value_col_to='asset')
+    return df
+
+def preprocess_timeseries_of_menu2160_for_multi_columns(df_menu2160):
+    df = preprocess_timeseries_for_multi_columns(df_menu2160, time_col_from='일자', value_cols_from=['수정\n기준가', '순자산총액'], time_col_to='date', value_cols_to=['price', 'asset'])
+    return df
+
+
