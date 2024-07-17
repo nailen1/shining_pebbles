@@ -54,23 +54,38 @@ def get_today(form="%Y-%m-%d"):
     today = mapping[form]
     return today
 
-def get_date_n_days_ago(date, n, form='%Y-%m-%d'):
+def get_date_n_days_ago(date, n, form=None):
     """
     Returns the date n days before the given date.
 
     Args:
-        date (str): The reference date.
+        date (str or datetime): The reference date.
         n (int): The number of days before the reference date.
-        form (str): The output date format.
+        form (str, optional): The output date format. If None, the input date format will be used.
 
     Returns:
-        str: The date n days before the reference date in the specified format.
+        str or datetime: The date n days before the reference date in the specified format if input is str,
+                         or as a datetime object if input is datetime.
     """
-    date = date.replace('-', '')
-    date_dt = datetime.strptime(date, '%Y%m%d')
-    date_before_n_dt = date_dt - timedelta(days=n)
-    date_before_n_str = date_before_n_dt.strftime(form)
-    return date_before_n_str
+    if isinstance(date, str):
+        if '-' in date:
+            input_format = '%Y-%m-%d'
+        elif len(date) == 8 and date.isdigit():
+            input_format = '%Y%m%d'
+        else:
+            raise ValueError("Unsupported date format")
+        
+        date_dt = datetime.strptime(date, input_format)
+        date_before_n_dt = date_dt - timedelta(days=n)
+        output_format = form if form else input_format
+        return date_before_n_dt.strftime(output_format)
+    
+    elif isinstance(date, datetime):
+        date_before_n_dt = date - timedelta(days=n)
+        return date_before_n_dt
+    
+    else:
+        raise TypeError("Input date must be a string or a datetime object")
 
 def get_yesterday(form="%Y-%m-%d"):
     """
@@ -987,3 +1002,18 @@ def print_tree(startpath, indent=""):
             print_tree(path, indent + "│   ")
         else:
             print(indent + "├── " + item)
+
+
+def save_dataset_of_subject_at(df, file_folder, subject, input_date):
+    file_name = f'dataset-{subject}-at{input_date.replace("-","")}-save{get_today("%Y%m%d%H")}.csv'
+    file_path = os.path.join(file_folder, file_name)
+    df.to_csv(file_path)
+    print(f'- save complete: {file_path}')
+    return df
+
+def save_dataset_of_subject_from_to(df, file_folder, subject, start_date, end_date):
+    file_name = f'dataset-{subject}-from{start_date.replace("-","")}-to{end_date.replace("-","")}-save{get_today("%Y%m%d%H")}.csv'
+    file_path = os.path.join(file_folder, file_name)
+    df.to_csv(file_path)
+    print(f'- save complete: {file_path}')
+    return df
