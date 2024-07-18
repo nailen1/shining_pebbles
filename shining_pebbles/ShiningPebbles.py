@@ -416,7 +416,7 @@ def get_last_key_and_value_in_json_file(dct):
     return last_key, last_value
 
 
-def format_date_to_str(date_input, output_format='%Y-%m-%d'):
+def format_date_to_str(date_input, form='%Y-%m-%d'):
     """
     Formats a date input to a specified string format if it is a datetime object.
     
@@ -431,7 +431,7 @@ def format_date_to_str(date_input, output_format='%Y-%m-%d'):
         ValueError: If the input date is not a string or datetime object.
     """
     if isinstance(date_input, datetime):
-        return date_input.strftime(output_format)
+        return date_input.strftime(form)
     elif isinstance(date_input, str):
         return date_input
     else:
@@ -463,6 +463,57 @@ def convert_type_of_date_input(date, form):
         raise ValueError("Input date must be a string or datetime object.")
     
     return date
+
+
+def save_dataset_of_subject_at(df, file_folder, subject, input_date):
+    """
+    Saves the dataset of a specific subject at a given date.
+
+    Args:
+        df (pandas.DataFrame): The DataFrame to save.
+        file_folder (str): The folder where the file should be saved.
+        subject (str): The subject of the dataset.
+        input_date (str): The date for the dataset.
+
+    Returns:
+        pandas.DataFrame: The saved DataFrame.
+    """
+    check_folder_and_create_folder(file_folder)
+    # Create file name with subject and input_date
+    file_name = f'dataset-{subject}-at{input_date.replace("-","")}-save{get_today("%Y%m%d%H")}.csv'
+    file_path = os.path.join(file_folder, file_name)
+    # Save DataFrame to CSV
+    df.to_csv(file_path, encoding='utf-8-sig')
+    print(f'- save complete: {file_path}')
+    return df
+
+
+def save_dataset_of_subject_from_to(df, file_folder, subject, start_date=None, end_date=None):
+    """
+    Saves the dataset of a specific subject from a start date to an end date.
+
+    Args:
+        df (pandas.DataFrame): The DataFrame to save.
+        file_folder (str): The folder where the file should be saved.
+        subject (str): The subject of the dataset.
+        start_date (str, optional): The start date for the dataset. If None, uses the first date in the DataFrame.
+        end_date (str, optional): The end date for the dataset. If None, uses the last date in the DataFrame.
+
+    Returns:
+        pandas.DataFrame: The saved DataFrame.
+    """
+    dates = df.index.tolist()
+    # Format start_date and end_date if not provided
+    start_date = format_date_to_str(dates[0], form="%Y%m%d")
+    end_date = format_date_to_str(dates[-1], form="%Y%m%d")
+    check_folder_and_create_folder(file_folder)
+    # Create file name with subject, start_date, and end_date
+    file_name = f'dataset-{subject}-from{start_date.replace("-","")}-to{end_date.replace("-","")}-save{get_today("%Y%m%d%H")}.csv'
+    file_path = os.path.join(file_folder, file_name)
+    # Save DataFrame to CSV
+    df.to_csv(file_path, encoding='utf-8-sig')
+    print(f'- save complete: {file_path}')
+    return df
 
 
 def save_df_to_file(df, file_folder, file_name_var, file_extension=".csv", archive=False, file_folder_archive="./archive"):
@@ -515,22 +566,6 @@ def check_folder_and_create_folder(folder_name):
         print(f"Already exists: {folder_name}")
     return folder_name
 
-def save_dataset_as_csv(df, file_folder, file_name_description):
-    """
-    Saves a DataFrame as a CSV file.
-
-    Args:
-        df (pd.DataFrame): The DataFrame to save.
-        file_folder (str): The folder to save the file in.
-        file_name_description (str): The description for the file name.
-
-    Returns:
-        None
-    """
-    file_folder = file_folder
-    file_name = file_name_description + ".csv"
-    file_path = os.path.join(file_folder, file_name)
-    df.to_csv(file_path)
 
 def quarter_string_to_date(quarter_string):
     """
