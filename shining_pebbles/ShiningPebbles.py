@@ -415,21 +415,55 @@ def get_last_key_and_value_in_json_file(dct):
     last_value = dct[last_key]
     return last_key, last_value
 
-def format_date(date, form="yyyymmdd"):
+
+def format_date_to_str(date_input, output_format='%Y-%m-%d'):
     """
-    Formats a date string to the specified format.
+    Formats a date input to a specified string format if it is a datetime object.
+    
+    Args:
+        date_input (str or datetime): The input date which can be a string or a datetime object.
+        output_format (str): The format to convert the datetime object to. Defaults to '%Y-%m-%d'.
+    
+    Returns:
+        str: The formatted date string or the original string if the input is already a string.
+    
+    Raises:
+        ValueError: If the input date is not a string or datetime object.
+    """
+    if isinstance(date_input, datetime):
+        return date_input.strftime(output_format)
+    elif isinstance(date_input, str):
+        return date_input
+    else:
+        raise ValueError("Input date must be a string or datetime object.")
+
+
+def convert_type_of_date_input(date, form):
+    """
+    Converts the input date based on its type.
+
+    If the input date is a string, it converts it to a datetime object using the given format.
+    If the input date is a datetime object, it converts it to a string using the given format.
 
     Args:
-        date (str): The date string.
-        form (str): The desired format ('yyyymmdd' or 'yyyy-mm-dd').
+        date (str or datetime): The input date which can be a string or a datetime object.
+        form (str): The format to use for conversion.
 
     Returns:
-        str: The formatted date string.
+        datetime or str: The converted date in the specified format.
+
+    Raises:
+        ValueError: If the input date is not a string or datetime object.
     """
-    date = date.replace("-", "")
-    date_dashed = datetime.strptime(date, "%Y%m%d").strftime("%Y-%m-%d")
-    mapping = {"yyyymmdd": date, "yyyy-mm-dd": date_dashed}
-    return mapping.get(form, date_dashed)
+    if isinstance(date, str):
+        date = datetime.strptime(date, form)
+    elif isinstance(date, datetime):
+        date = date.strftime(form)
+    else:
+        raise ValueError("Input date must be a string or datetime object.")
+    
+    return date
+
 
 def save_df_to_file(df, file_folder, file_name_var, file_extension=".csv", archive=False, file_folder_archive="./archive"):
     """
