@@ -16,6 +16,6 @@ pip install shining_pebbles
 
 ## Contact
 
-- **June Young Park**, RPA Dev Team Lead at Life Asset Management
+- **June Young Park**, RPA Dev Team Lead at LIFE Asset Management
 - Email: [juneyoungpaak@gmail.com](mailto:juneyoungpaak@gmail.com)
 - **Life Asset Management**, A hedge fund and private equity management firm headquartered in the International Finance Center, Yeouido, South Korea, dedicated to enhancing corporate value and shareholder value.

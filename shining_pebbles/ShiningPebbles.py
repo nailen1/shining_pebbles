@@ -5,9 +5,10 @@ import re
 import time
 import calendar
 import datetime
+import shutil
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
-import shutil
+from typing import List, Tuple
 
 def measure_time(func):
     """
@@ -185,6 +186,68 @@ def detect_date_format(date_str):
     else:
         return "%Y%m%d"
 
+
+def get_month_end_dates(start_year_month: str, end_year_month: str, date_format: str = "%Y%m%d") -> List[str]:
+    """
+    Generates a list of month-end dates between two given year-months.
+
+    Args:
+        start_year_month (str): The start year-month in the format 'YYYYMM'.
+        end_year_month (str): The end year-month in the format 'YYYYMM'.
+        date_format (str): The format in which to return the dates (default is '%Y%m%d').
+
+    Returns:
+        list: A list of month-end dates in the specified format.
+
+    Raises:
+        ValueError: If the input date strings are not in the 'YYYYMM' format.
+    """
+    try:
+        start_date = datetime.strptime(start_year_month, "%Y%m")
+        end_date = datetime.strptime(end_year_month, "%Y%m")
+    except ValueError:
+        raise ValueError("The date strings must be in 'YYYYMM' format")
+
+    month_end_dates = []
+    current_date = start_date
+    while current_date <= end_date:
+        last_day = calendar.monthrange(current_date.year, current_date.month)[1]
+        month_end_date = current_date.replace(day=last_day)
+        month_end_dates.append(month_end_date.strftime(date_format))
+        if current_date.month == 12:
+            current_date = current_date.replace(year=current_date.year + 1, month=1, day=1)
+        else:
+            current_date = current_date.replace(month=current_date.month + 1, day=1)
+    
+    return month_end_dates
+
+
+def get_end_date_pairs(start_year_month: str, end_year_month: str, date_format: str = '%Y-%m-%d') -> List[Tuple[str, str]]:
+    """
+    Generates a list of tuples, where each tuple contains a pair of consecutive month-end dates between two given year-months.
+
+    Args:
+        start_year_month (str): The start year-month in the format 'YYYYMM'.
+        end_year_month (str): The end year-month in the format 'YYYYMM'.
+        date_format (str): The format in which to return the dates (default is '%Y-%m-%d').
+
+    Returns:
+        list: A list of tuples, each containing a pair of consecutive month-end dates in the specified format.
+
+    Raises:
+        ValueError: If the input date strings are not in the 'YYYYMM' format.
+    """
+    # Generate the list of month-end dates using the provided function
+    end_dates = get_month_end_dates(start_year_month=start_year_month, end_year_month=end_year_month, date_format=date_format)
+    
+    # Create pairs of consecutive month-end dates
+    dates_i = end_dates[:-1]
+    dates_f = end_dates[1:]
+    dates = list(zip(dates_i, dates_f))
+    
+    return dates
+
+
 def generate_date_list(start_date_str):
     """
     Generates a list of date strings from a given start date to today.
@@ -325,6 +388,21 @@ def calculate_prior_date_extended(base_date, days=0, months=0, years=0):
     base_date_obj = datetime.strptime(base_date, date_format)
     prior_date_obj = base_date_obj - relativedelta(days=days, months=months, years=years)
     return prior_date_obj.strftime(date_format)
+
+
+def convert_keys(data, key_mapping):
+    """
+    Converts the keys of dictionaries in a list according to a given key mapping.
+
+    Parameters:
+    data (list of dict): List of dictionaries with the original keys.
+    key_mapping (dict): Dictionary with original keys as keys and new keys as values.
+
+    Returns:
+    list of dict: List of dictionaries with the converted keys.
+    """
+    return [{key_mapping.get(k, k): v for k, v in item.items()} for item in data]
+
 
 def rename_key(dct, old_key, new_key):
     """
@@ -780,6 +858,43 @@ def get_fund_codes_in_file_folder(dataset_file_folder):
     fund_codes = [pick_something_in_string(file_name, something=r'-code.{6}')[5:] for file_name in file_names]
     return fund_codes
 
+def pick_dates_in_file_folder(file_folder, regex, form="%Y%m%d"):
+    """
+    Picks the dates in a file folder based on the file names.
+
+    Args:
+        file_folder (str): The file folder.
+        regex (str): The regex pattern to match.
+        form (str): The date format.
+
+    Returns:
+        list of str: The dates in the file folder.
+    """
+    file_names = scan_files_including_regex(file_folder=file_folder, regex=regex)
+    dates = [pick_input_date_in_file_name(file_name) for file_name in file_names]
+    if form == "%Y%m%d":
+        pass
+    elif form == "%Y-%m-%d":
+        dates = [f'{date[:4]}-{date[4:6]}-{date[6:]}' for date in dates]
+    return dates
+
+def pick_latest_date_in_file_folder(file_folder, regex, form="%Y%m%d"):
+    """
+    Picks the latest date in a file folder based on the file names.
+
+    Args:
+        file_folder (str): The file folder.
+        regex (str): The regex pattern to match.
+        form (str): The date format.
+
+    Returns:
+        str: The latest date in the file folder.
+    """
+    dates = pick_dates_in_file_folder(file_folder, regex, form)
+    latest_date = dates[-1]
+    return latest_date
+
+
 def move_files(regex, folder_from, folder_to, option='copy'):
     """
     Moves or copies files matching a regex pattern from one folder to another.
@@ -807,6 +922,42 @@ def move_files(regex, folder_from, folder_to, option='copy'):
         else:
             print("Invalid option. Please choose 'copy' or 'move'.")
             return
+
+
+def change_to_numeric(x):
+    if isinstance(x, str):
+        if x == '-':
+            return np.nan
+        else:
+            return float(x.replace(',', ''))
+    else:
+        return x
+
+
+def compare_dataframes(df1, df2, key):
+    """
+    Compare two dataframes and return two dataframes:
+    1. Rows where the key is duplicated in both df1 and df2.
+    2. Rows where the key is only in df2 and not in df1.
+
+    Args:
+    df1 (pd.DataFrame): The first dataframe.
+    df2 (pd.DataFrame): The second dataframe.
+    key (str): The column name to compare.
+
+    Returns:
+    pd.DataFrame: DataFrame with duplicated rows based on the key.
+    pd.DataFrame: DataFrame with rows only in df2 and not in df1.
+    """
+    # Merge df1 and df2 on the key column to find duplicates
+    merged_df = pd.merge(df1, df2, on=key, how='inner')
+    
+    # Find rows in df2 that are not in df1
+    unique_to_df2 = df2[~df2[key].isin(df1[key])]
+    
+    return merged_df, unique_to_df2
+
+
 
 def update_df_time_series(df_old, df_new):
     """
