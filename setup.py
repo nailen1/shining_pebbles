@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='shining_pebbles',
-    version='0.2.6',
+    version='0.2.61',
     packages=find_packages(),
     install_requires=[
         'pandas',

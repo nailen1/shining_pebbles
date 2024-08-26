@@ -457,8 +457,11 @@ def open_df_in_file_folder_by_regex(file_folder, regex, option="path", index_col
     Returns:
         pd.DataFrame: The DataFrame loaded from the file.
     """
-    latest_file_path = scan_files_including_regex(file_folder, regex, option)[-1]
-    df = pd.read_csv(latest_file_path, index_col=index_col)
+    try:
+        latest_file_path = scan_files_including_regex(file_folder, regex, option)[-1]
+        df = pd.read_csv(latest_file_path, index_col=index_col)
+    except IndexError as e:
+        print(f"Error: {e}")
     return df
 
 def open_json_in_file_folder_by_regex(file_folder, regex, option="path", index=-1):
@@ -1204,36 +1207,131 @@ def preprocess_timeseries_of_menu2160_for_multi_columns(df_menu2160):
     df = preprocess_timeseries_for_multi_columns(df_menu2160, time_col_from='일자', value_cols_from=['수정\n기준가', '순자산총액'], time_col_to='date', value_cols_to=['price', 'asset'])
     return df
 
-def print_tree(startpath, indent=""):
+
+def print_directory_structure(root_dir, ignore_dirs=None):
     """
-    Prints the directory tree starting from a given path.
+    Prints the directory structure of a given root directory.
 
     Args:
-        startpath (str): The starting path.
-        indent (str): The indentation string.
+        root_dir (str): The path to the root directory.
+        ignore_dirs (list, optional): List of directory names to ignore. 
+                                      Defaults to ['.git', '__pycache__', '.ipynb_checkpoints'].
+
+    This function prints the structure of the directory tree starting from the 
+    specified root directory. It ignores hidden directories and those listed 
+    in the ignore_dirs argument. Directories are marked with '/' at the end of 
+    their names, and hidden files/directories are displayed with a different marker.
+    
+    Example:
+        root_dir/
+        ├── dir1/
+        ├── dir2/
+        │   ├── file1.txt
+        │   └── file2.txt
+        └── file3.txt
 
     Returns:
         None
     """
-    for item in os.listdir(startpath):
-        path = os.path.join(startpath, item)
-        if os.path.isdir(path):
-            print(indent + "├── " + item + "/")
-            print_tree(path, indent + "│   ")
-        else:
-            print(indent + "├── " + item)
+    
+    if ignore_dirs is None:
+        ignore_dirs = ['.git', '__pycache__', '.ipynb_checkpoints']
+    
+    # Print the root directory name only
+    print(os.path.basename(root_dir) + '/')
+    
+    def print_directory(path, prefix=''):
+        contents = sorted(os.listdir(path))
+        contents = [c for c in contents if c not in ignore_dirs]
+        
+        for index, item in enumerate(contents, start=1):
+            is_last = index == len(contents)
+            is_hidden = item.startswith('.')
+            full_path = os.path.join(path, item)
+            is_dir = os.path.isdir(full_path)
+            
+            if is_last:
+                if is_hidden:
+                    marker = '└··'
+                else:
+                    marker = '└──'
+                next_prefix = prefix + '    '
+            else:
+                if is_hidden:
+                    marker = '├··'
+                else:
+                    marker = '├──'
+                next_prefix = prefix + '│   '
+            
+            # Add '/' to directory names
+            if is_dir:
+                item += '/'
+            
+            print(f"{prefix}{marker} {item}")
+            
+            if is_dir and item not in ignore_dirs:
+                try:
+                    print_directory(full_path, next_prefix)
+                except PermissionError:
+                    print(f"{next_prefix}[Permission Denied]")
+                except Exception as e:
+                    print(f"{next_prefix}[Error: {str(e)}]")
+    
+    print_directory(root_dir)
+    return None
 
 
 def save_dataset_of_subject_at(df, file_folder, subject, input_date):
+    """
+    Saves a DataFrame as a CSV file with a specific naming convention.
+
+    Args:
+        df (pd.DataFrame): The DataFrame to be saved.
+        file_folder (str): The folder path where the CSV file will be saved.
+        subject (str): The subject or name to be included in the file name.
+        input_date (str): The date associated with the dataset, formatted as 'YYYY-MM-DD'.
+
+    The function generates a CSV file name based on the provided subject and input date, 
+    along with the current timestamp (YYYYMMDDHH format). The file is saved in the 
+    specified folder, and a confirmation message is printed with the full file path.
+
+    Example:
+        - save complete: dataset-analysis/dataset-example-at20230824-save2023082412.csv
+
+    Returns:
+        pd.DataFrame: The original DataFrame.
+    """
     file_name = f'dataset-{subject}-at{input_date.replace("-","")}-save{get_today("%Y%m%d%H")}.csv'
     file_path = os.path.join(file_folder, file_name)
     df.to_csv(file_path)
     print(f'- save complete: {file_path}')
     return df
 
+
 def save_dataset_of_subject_from_to(df, file_folder, subject, start_date, end_date):
+    """
+    Saves a DataFrame as a CSV file with a specific naming convention including date range.
+
+    Args:
+        df (pd.DataFrame): The DataFrame to be saved.
+        file_folder (str): The folder path where the CSV file will be saved.
+        subject (str): The subject or name to be included in the file name.
+        start_date (str): The start date of the data range, formatted as 'YYYY-MM-DD'.
+        end_date (str): The end date of the data range, formatted as 'YYYY-MM-DD'.
+
+    The function generates a CSV file name based on the provided subject and date range, 
+    along with the current timestamp (YYYYMMDDHH format). The file is saved in the 
+    specified folder, and a confirmation message is printed with the full file path.
+
+    Example:
+        - save complete: dataset-analysis/dataset-example-from20230801-to20230824-save2023082412.csv
+
+    Returns:
+        pd.DataFrame: The original DataFrame.
+    """
     file_name = f'dataset-{subject}-from{start_date.replace("-","")}-to{end_date.replace("-","")}-save{get_today("%Y%m%d%H")}.csv'
     file_path = os.path.join(file_folder, file_name)
     df.to_csv(file_path)
     print(f'- save complete: {file_path}')
     return df
+
