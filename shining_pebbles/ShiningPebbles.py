@@ -444,6 +444,8 @@ def scan_files_including_regex(file_folder, regex, option="name"):
     lst_ordered = sorted(mapping[option])
     return lst_ordered
 
+import pandas as pd
+
 def open_df_in_file_folder_by_regex(file_folder, regex, option="path", index_col=0):
     """
     Opens a DataFrame from the latest file in a folder matching a regex pattern.
@@ -455,13 +457,10 @@ def open_df_in_file_folder_by_regex(file_folder, regex, option="path", index_col
         index_col (int): The column to use as the row labels of the DataFrame.
 
     Returns:
-        pd.DataFrame: The DataFrame loaded from the file.
+        pd.DataFrame or None: The DataFrame loaded from the file, or None if no file is found.
     """
-    try:
-        latest_file_path = scan_files_including_regex(file_folder, regex, option)[-1]
-        df = pd.read_csv(latest_file_path, index_col=index_col)
-    except IndexError as e:
-        print(f"Error: {e}")
+    latest_file_path = scan_files_including_regex(file_folder, regex, option)[-1]
+    df = pd.read_csv(latest_file_path, index_col=index_col)
     return df
 
 def open_json_in_file_folder_by_regex(file_folder, regex, option="path", index=-1):
@@ -481,6 +480,15 @@ def open_json_in_file_folder_by_regex(file_folder, regex, option="path", index=-
     with open(latest_file_path, 'r', encoding='utf-8') as file:
         dct = json.load(file)
     return dct
+
+def open_df_in_file_folder_by_regex_with_exception(file_folder, regex, option="path", index_col=0):
+    try:
+        latest_file_path = scan_files_including_regex(file_folder, regex, option)[-1]
+        df = pd.read_csv(latest_file_path, index_col=index_col)
+        return df
+    except IndexError as e:
+        print(f"Error: {e}")
+        return None
 
 def get_last_key_and_value_in_json_file(dct):
     """
@@ -1029,6 +1037,7 @@ def update_timeseries_dataset_from_old_and_new_in_file_folder(file_folder, fund_
         df_update.to_csv(file_path)
         print(f"Updated dataset saved: {file_name}")
     return df_update
+    
 
 def update_all_timeseries_datasets_in_file_folder(dataset_file_folder):
     """
@@ -1335,3 +1344,10 @@ def save_dataset_of_subject_from_to(df, file_folder, subject, start_date, end_da
     print(f'- save complete: {file_path}')
     return df
 
+
+def inject_hotfix_data_in_df(df, data, ref_col):
+    df_hotfix = pd.DataFrame(data)
+    df = pd.concat([df, df_hotfix], ignore_index=True)
+    df = df.drop_duplicates(subset=ref_col, keep='last')
+    df = df.sort_values(by=ref_col).reset_index(drop=True)
+    return df
