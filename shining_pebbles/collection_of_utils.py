@@ -1351,3 +1351,45 @@ def inject_hotfix_data_in_df(df, data, ref_col):
     df = df.drop_duplicates(subset=ref_col, keep='last')
     df = df.sort_values(by=ref_col).reset_index(drop=True)
     return df
+
+
+def convert_to_unit(number, language='KR', level=None):
+    if pd.isna(number) or number == "NaN":
+        return number
+
+    number = abs(float(str(number).replace(',', '')))
+    
+    if language.upper() == 'KR':
+        units = [
+            (1e12, '조'),
+            (1e8, '억'),
+            (1e4, '만'),
+            (1, '')
+        ]
+    else:  # 'EN' or any other language
+        units = [
+            (1e12, 'T'),
+            (1e9, 'B'),
+            (1e6, 'M'),
+            (1e3, 'K'),
+            (1, '')
+        ]
+
+    if level is None:
+        level = len(units)
+
+    result = []
+    for i, (unit_value, unit_name) in enumerate(units[:level]):
+        unit_count = int(number // unit_value)
+        if unit_count > 0:
+            result.append(f"{unit_count}{unit_name}")
+        number %= unit_value
+
+    if not result:
+        return '0'
+
+    return ' '.join(result)
+
+
+def format_number(number):
+    return f"{number:,}"
