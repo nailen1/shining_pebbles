@@ -1,8 +1,10 @@
 from .office_system_dataset_cleanser import preprocess_columns_in_multi_columned_df, preprocess_multi_columned_df, classify_category_in_multi_columned_df
-from .office_system_dataset_utils import parse_commaed_number, force_int
+from .office_system_dataset_utils import parse_commaed_number, force_int, transform_fund_code_float_to_string
 
 preprocess_cols_menu2205 = preprocess_columns_in_multi_columned_df
 classify_columns_menu2205 = classify_category_in_multi_columned_df
 
+force_float = parse_commaed_number
 format_commaed_number = parse_commaed_number
 format_integer = force_int
+format_fund_code = transform_fund_code_float_to_string
