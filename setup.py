@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='shining_pebbles',
-    version='0.4.2',
+    version='0.4.3',
     packages=find_packages(),
      install_requires=[
         'numpy>=1.21.0',  # NumPy 1.x와 2.x 모두 지원

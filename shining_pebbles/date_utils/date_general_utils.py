@@ -2,7 +2,7 @@ import datetime
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import calendar
-from typing import List
+from typing import List, Tuple
 
 
 def get_today(form="%Y-%m-%d"):
