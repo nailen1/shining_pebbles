@@ -19,3 +19,11 @@ pip install shining_pebbles
 - **June Young Park**, AI Management Dev Team Lead at LIFE Asset Management
 - Email: [juneyoungpaak@gmail.com](mailto:juneyoungpaak@gmail.com)
 - **Life Asset Management**, A hedge fund and private equity management firm headquartered in the International Finance Center, Yeouido, South Korea, dedicated to enhancing corporate value and shareholder value.
+
+## Version History
+
+### v0.5.0
+- Added new module `delete_utils.py` for file deletion operations
+  - `delete_file`: Delete a single file
+  - `delete_old_files`: Delete old files while keeping N newest files
+  - `delete_old_files_in_file_folder_by_regex`: Delete old files in a folder matching regex pattern
