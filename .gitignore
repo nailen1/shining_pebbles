@@ -7,6 +7,7 @@ data-test/
 # jupyter notebook for test
 .ipynb_checkpoints/
 test*.ipynb
+*.ipynb
 
 # commands markdown document
 commands.md
