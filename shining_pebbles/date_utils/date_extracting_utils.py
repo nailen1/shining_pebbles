@@ -1,5 +1,5 @@
 from functools import partial
-from shining_pebbles.file_scan_utils import scan_files_including_regex
+from shining_pebbles.pseudo_database.file_scan_utils import scan_files_including_regex
 from .date_converter_utils import transform_date_str_to_date_str_dashed
 
 def parse_date(file_name, pattern, option_dashed=True):

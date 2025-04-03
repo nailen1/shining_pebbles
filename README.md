@@ -22,6 +22,9 @@ pip install shining_pebbles
 
 ## Version History
 
+### v0.5.2
+- Fixed import path bug in `date_extracting_utils.py`
+
 ### v0.5.1
 - Restructured project layout for better organization
   - Moved file management utilities to `pseudo_database` package
