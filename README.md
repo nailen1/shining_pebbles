@@ -22,6 +22,9 @@ pip install shining_pebbles
 
 ## Version History
 
+### v0.5.3
+- Fixed module import structure in root `__init__.py`
+
 ### v0.5.2
 - Fixed import path bug in `date_extracting_utils.py`
 

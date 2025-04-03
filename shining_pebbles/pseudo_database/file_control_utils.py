@@ -6,7 +6,7 @@ import time
 import shutil
 import datetime
 from datetime import datetime, timedelta
-from .date_utils import get_today
+from shining_pebbles.date_utils import get_today
 
 def measure_time(func):
     """
