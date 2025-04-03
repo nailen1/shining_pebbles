@@ -22,6 +22,12 @@ pip install shining_pebbles
 
 ## Version History
 
+### v0.5.1
+- Restructured project layout for better organization
+  - Moved file management utilities to `pseudo_database` package
+  - Added new `load_utils.py` for DataFrame loading operations
+  - Split file utilities into specialized modules
+
 ### v0.5.0
 - Added new module `delete_utils.py` for file deletion operations
   - `delete_file`: Delete a single file

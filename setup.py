@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='shining_pebbles',
-    version='0.5.0',
+    version='0.5.1',
     packages=find_packages(),
      install_requires=[
         'numpy>=1.21.0',  # NumPy 1.x와 2.x 모두 지원
@@ -10,6 +10,7 @@ setup(
         'python-dateutil',
         'pybind11>=2.12',
         'aws-s3-controller>=0.7.3',
+        'openpyxl>=3.1.5',
     ],
 
     author='June Young Park',

@@ -1,5 +1,5 @@
 import os
-from .collection_of_utils import scan_files_including_regex
+from .file_scan_utils import scan_files_including_regex
 
 def delete_file(file_path):
     try:
